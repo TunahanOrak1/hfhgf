@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Basit Video Oynatıcı</title>
+    <style>
+        #videoPlayer {
+            width: 100%;
+            max-width: 600px;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+        .history {
+            margin-top: 20px;
+        }
+        .history-item {
+            margin-bottom: 10px;
+        }
+        .history-item img {
+            width: 100px;
+            height: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <video id="videoPlayer" controls>
+            <source src="https://storage.diziyou.co/episodes/11341_tr/720p.m3u8" type="video/mp4" data-title="Rick and Morty" data-thumbnail="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTAaM5X57P9LqstO2KSC8tI2rfWbBwQjE-jkQ&s">
+            Tarayıcınız video etiketini desteklemiyor.
+        </video>
+        <div class="controls">
+            <button onclick="playVideo()">Oynat</button>
+            <button onclick="pauseVideo()">Duraklat</button>
+            <button onclick="muteVideo()">Sesi Kapat</button>
+            <button onclick="unmuteVideo()">Sesi Aç</button>
+            <button onclick="toggleFullScreen()">Tam Ekran</button>
+        </div>
+    </div>
+
+    <div class="history">
+        <h3>İzleme Geçmişi</h3>
+        <div id="historyList"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoPlayer');
+        const videoContainer = document.getElementById('videoContainer');
+        const historyList = document.getElementById('historyList');
+
+        // Video oynatıldığında izleme geçmişine ekle
+        video.addEventListener('play', () => {
+            const currentVideo = video.querySelector('source');
+            const videoSrc = currentVideo.src;
+            const videoTitle = currentVideo.getAttribute('data-title');
+            const videoThumbnail = currentVideo.getAttribute('data-thumbnail');
+            addToHistory(videoSrc, videoTitle, videoThumbnail);
+            displayHistory();
+        });
+
+        function playVideo() {
+            video.play();
+        }
+
+        function pauseVideo() {
+            video.pause();
+        }
+
+        function muteVideo() {
+            video.muted = true;
+        }
+
+        function unmuteVideo() {
+            video.muted = false;
+        }
+
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                if (videoContainer.requestFullscreen) {
+                    videoContainer.requestFullscreen();
+                } else if (videoContainer.mozRequestFullScreen) { // Firefox
+                    videoContainer.mozRequestFullScreen();
+                } else if (videoContainer.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                    videoContainer.webkitRequestFullscreen();
+                } else if (videoContainer.msRequestFullscreen) { // IE/Edge
+                    videoContainer.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.mozCancelFullScreen) { // Firefox
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) { // Chrome, Safari and Opera
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) { // IE/Edge
+                    document.msExitFullscreen();
+                }
+            }
+        }
+
+        function addToHistory(videoSrc, videoTitle, videoThumbnail) {
+            let history = JSON.parse(localStorage.getItem('videoHistory')) || [];
+            if (!history.some(item => item.src === videoSrc)) {
+                history.push({ src: videoSrc, title: videoTitle, thumbnail: videoThumbnail });
+                localStorage.setItem('videoHistory', JSON.stringify(history));
+            }
+        }
+
+        function displayHistory() {
+            let history = JSON.parse(localStorage.getItem('videoHistory')) || [];
+            historyList.innerHTML = '';
+            history.forEach(item => {
+                let historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+
+                let title = document.createElement('h4');
+                title.textContent = item.title;
+
+                let thumbnail = document.createElement('img');
+                thumbnail.src = item.thumbnail;
+                thumbnail.alt = item.title;
+
+                historyItem.appendChild(title);
+                historyItem.appendChild(thumbnail);
+                historyList.appendChild(historyItem);
+            });
+        }
+
+        // Sayfa yüklendiğinde izleme geçmişini göster
+        document.addEventListener('DOMContentLoaded', displayHistory);
+    </script>
+</body>
+</html>
